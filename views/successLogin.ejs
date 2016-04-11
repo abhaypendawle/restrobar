@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Successful Login</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Successfull</h1>
+    <div>
+	       <% for(var i in data) 
+	            {                     
+            %>
+
+           		    <p><strong>EmailId: </strong><%= data[i].username %></p>
+
+            		<br>       
+           <%
+	            }  
+	       %>
+	</div>
+  </body>
+</html>

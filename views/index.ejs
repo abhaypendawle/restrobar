@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="ISO-8859-1">
+<title>Restro Menu Order</title>
+
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+
+ 
+ <link rel="stylesheet" href="https://cdn.rawgit.com/esvit/ng-table/v1.0.0/dist/ng-table.min.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    
+</head>
+<body ng-app="AddToCart" ng-controller="addTOCartController" background="..\images\bg.jpg" style="opacity: .8">
+
+<nav class="navbar navbar-default" style="background:#FFF" >
+
+ <div class="container-fluid"  style="background-color:#555555">
+    <div class="navbar-header" >
+      <a class="navbar-brand" href="#" style="color:#FFF">
+        Welcome to RestroBar
+      </a>
+	  
+	 
+	  
+	 
+	  
+    </div>
+	 <div class="btn navbar-btn btn-primary pull-right" style="color:#000; background-color:#FFF" ng-click="confirmOrder()">
+	  Confirm Order
+	  </div>
+	 <div class="btn navbar-btn btn-primary pull-right" style="color:#000; background-color:#FFF" ng-click="newOrder()">
+		 New Order
+	 </div>
+	 <!--<div class="btn navbar-btn btn-primary pull-right" style="color:#000; background-color:#FFF" ng-click="Logout()">
+		 Logout
+	 </div>-->
+	 <div >
+
+	 <form action = '/checksession/logout' method="get">
+		 <!--<btn class="btn navbar-btn btn-primary pull-right" style="color:#000; background-color:#FFF">
+			 Logout
+		 </btn>-->
+		 <input type="submit" value="Logout" class="btn navbar-btn btn-primary pull-right" style="color:#000; background-color:#FFF">
+		<!-- <button >Logout</button>-->
+	 </form>
+	</div>
+  </div>
+  
+  
+  <!-- 
+
+<div class="navbar-header" style"background-color:Teal">
+	<h3 align="center"><strong><em>Retro</em></strong><h3>
+</div> -->
+
+<div class="row"  >
+
+	<div class="col-md-6">
+	
+	<table class="table table-condensed">
+    	<caption><center><h2>Menu</h2></center></caption>
+    	<tr class="bg-success">
+    		
+    		<td><h3>Food Menu</h3></td>
+    		<td><h3>Rate</h3></td>
+			<td></td>
+    	</tr>
+    	<tr ng-repeat="product in products">
+    		
+    		<td>{{product.Name}}</td>
+    		<td>${{product.Rate}}</td>
+			<td><center><input type="button" class="btn btn-success" ng-click="addToCart(product)" value="Add to cart"></center></td>
+    	</tr>
+    </table>
+    
+
+	</div>
+
+	
+	<div class="col-md-6">
+		<div ng-hide="display">
+		
+	<table class="table table-condensed">
+	<caption><center><h2>My Order</h2></center></caption>
+	<tr class="bg-success">
+    		<td></td>
+    		<td><h3>Food Menu</h3></td>
+    		<td><h3>Rate</h3></td>
+			<td></td>
+    	</tr>
+	<div ng-init="show()">
+	<tr ng-repeat="item in displaytab">
+			<td></td>
+    		<td>{{item.Name}}</td>
+    		<td>${{item.Rate}}</td>	
+			<td><div class="btn btn-small btn-danger" ng-click="removeItem(item)">Remove</div></td>
+			
+    </tr>
+    <tr>
+	<td></td>
+    	<td style="font-weight: bold;">Total amount</td>
+    	<td style="font-weight: bold;">${{total}}</td> 
+		<td></td>
+    </tr>
+    </div>
+    </table>
+		</div>
+	</div>	
+</div>
+
+</nav>
+<script type="text/javascript">
+
+	var app=angular.module('AddToCart',[]);
+	app.controller('addTOCartController',function($scope,$http){
+		$scope.display=true;
+		$scope.displaytab=[];
+		$scope.cartDisplay=true;
+		
+		$scope.total=0;
+		
+		$scope.products=[{Name:"Chips", Rate:2},
+		                 {Name:"Coke", Rate:3},
+		                 {Name:"Pizza", Rate:5}];
+		
+		console.log($scope.products);
+		
+		$scope.cartproducts=[];
+		
+		$scope.show=function()
+		{
+		$scope.display=false;
+			var ajax_response=$http.get('/checksession/show');
+			ajax_response.success(function(data)
+			{
+				$scope.displaytab = data;
+				$scope.d=data;
+				 angular.forEach($scope.displaytab, function(value, key){
+				$scope.total += value.Rate;
+				});
+				console.log("in init:"+JSON.stringify($scope.displaytab));
+			});
+			ajax_response.error(function(response)
+			{
+				console.log("error occured");
+			}); 
+		
+		}
+		
+		$scope.addToCart=function(product)
+		{
+			$scope.display=false;
+
+			$scope.total=$scope.total+product.Rate;
+			console.log("Add to cart");
+			
+			var data = [];
+			data.push(product);
+			var ajax_response=$http.post('/checksession/validate',{'product':product});
+			ajax_response.success(function(data)
+			{
+				$scope.displaytab = data;
+				$scope.d=data;
+				
+				
+				
+				console.log("in index:"+JSON.stringify($scope.displaytab));
+			});
+			ajax_response.error(function(response)
+			{
+				console.log("error occured");
+			}); 
+		}
+		
+			$scope.removeItem=function(product)
+		{
+			$scope.display=false;
+
+			$scope.total=$scope.total-product.Rate;
+			console.log("Add to cart");
+			
+			var data = [];
+			data.pop(product);
+			var ajax_response=$http.post('/checksession/remove',{'product':product});
+			ajax_response.success(function(data)
+			{
+				$scope.displaytab = data;
+				$scope.d=data;
+				
+				
+				
+				console.log("in index:"+JSON.stringify($scope.displaytab));
+			});
+			ajax_response.error(function(response)
+			{
+				console.log("error occured");
+			}); 
+		}
+		
+		$scope.confirmOrder=function()
+		{
+		$scope.display=false;
+			var ajax_response=$http.get('/checksession/confirmOrder');
+			ajax_response.success(function(data)
+			{
+				$scope.displaytab = data;
+				$scope.d=data;
+				$scope.total = 0;
+				console.log("in init:"+JSON.stringify($scope.displaytab));
+			});
+			ajax_response.error(function(response)
+			{
+				console.log("error occured");
+			});
+
+			alert("your order has been mailed to your mail id");
+		
+		}
+		$scope.newOrder=function()
+		{
+			$scope.display=false;
+			var ajax_response=$http.get('/checksession/newOrder');
+			ajax_response.success(function(data)
+			{
+				$scope.displaytab = data;
+				$scope.d=data;
+				$scope.total = 0;
+				console.log("in init:"+JSON.stringify($scope.displaytab));
+			});
+			ajax_response.error(function(response)
+			{
+				console.log("error occured");
+			});
+
+		}
+		$scope.Logout=function()
+		{
+			$scope.display=false;
+			var ajax_response=$http.get('/checksession/logout');
+			ajax_response.success(function(data)
+			{
+				$scope.displaytab = data;
+				$scope.d=data;
+				$scope.total = 0;
+				console.log("in init:"+JSON.stringify($scope.displaytab));
+			});
+			ajax_response.error(function(response)
+			{
+				console.log("error occured");
+			});
+
+		}
+
+
+
+	});
+</script>
+
+</body>
+</html>
